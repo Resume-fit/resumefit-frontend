@@ -1,0 +1,115 @@
+/* 공통 페이지 래퍼 */
+.page-wrapper {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.page-content {
+  padding-top: 80px; /* Navigation 높이 */
+  min-height: calc(100vh - 80px);
+}
+
+.page-title-section {
+  text-align: center;
+  padding: 40px 20px 30px;
+}
+
+.page-title-section h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.page-title-section p {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+/* 로딩 상태 */
+.loading {
+  text-align: center;
+  padding: 100px 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+/* 에러 메시지 */
+.error-message {
+  max-width: 800px;
+  margin: 0 auto 20px;
+  padding: 16px;
+  background: #fee2e2;
+  border-radius: 8px;
+  color: #dc2626;
+  text-align: center;
+}
+
+/* 빈 상태 */
+.empty-state {
+  max-width: 600px;
+  margin: 40px auto;
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state p {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.action-btn {
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.action-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.action-btn.secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.action-btn.secondary:hover {
+  background: #667eea;
+  color: white;
+}
+
+/* 결과 정보 */
+.results-info {
+  max-width: 1200px;
+  margin: 0 auto 20px;
+  padding: 0 20px;
+  font-size: 16px;
+  color: #666;
+}
+
+.results-info strong {
+  color: #333;
+  font-size: 18px;
+}

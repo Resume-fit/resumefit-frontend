@@ -1,0 +1,81 @@
+.detail-container {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 40px 20px;
+}
+
+.detail-header {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+}
+
+.back-button {
+  padding: 10px 20px;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 20px;
+}
+
+.back-button:hover {
+  background: #667eea;
+  color: white;
+}
+
+.detail-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.detail-meta {
+  display: flex;
+  gap: 24px;
+  font-size: 14px;
+  color: #888;
+}
+
+.pdf-viewer {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.pdf-viewer iframe {
+  border: none;
+  display: block;
+}
+
+.no-preview {
+  padding: 100px 40px;
+  text-align: center;
+  color: #888;
+  font-size: 16px;
+}
+
+.loading {
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+  padding: 100px 40px;
+}
+
+.error-message {
+  max-width: 600px;
+  margin: 0 auto 20px;
+  background-color: #fee;
+  color: #c33;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 16px;
+}
