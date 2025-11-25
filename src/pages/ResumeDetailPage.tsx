@@ -46,15 +46,21 @@ const ResumeDetailPage: React.FC = () => {
   };
 
   const fetchMatchingResults = async () => {
-    try {
-      setMatchingLoading(true);
-      const data = await matchingAPI.getMatchingResults(Number(resumeId));
-      setMatchingResults(data);
-    } catch (err: any) {
-      console.error('매칭 결과 조회 실패:', err);
-    } finally {
-      setMatchingLoading(false);
+  try {
+    setMatchingLoading(true);
+    const data = await matchingAPI.getMatchingResults(Number(resumeId));
+    console.log('🔍 매칭 결과 원본 데이터:', JSON.stringify(data, null, 2));
+    console.log('🔍 첫 번째 결과:', data[0]);
+    if (data[0]) {
+      console.log('🔍 jobPosition:', data[0].jobPosition);
+      console.log('🔍 companyName:', data[0].jobPosition?.companyName);
     }
+    setMatchingResults(data);
+  } catch (err: any) {
+    console.error('매칭 결과 조회 실패:', err);
+  } finally {
+    setMatchingLoading(false);
+  }
   };
 
   if (loading) {
@@ -200,10 +206,10 @@ const ResumeDetailPage: React.FC = () => {
                               </div>
                               <div className="company-details">
                                 <h3 className="company-name">
-                                  {result.jobPosition?.companyName || '회사명 없음'}
+                                  {result.jobPosition.companyName || '회사명 없음'}
                                 </h3>
                                 <h4 className="position-name">
-                                  {result.jobPosition?.positionName || '포지션명 없음'}
+                                  {result.jobPosition.positionName || '포지션명 없음'}
                                 </h4>
                               </div>
                             </div>
@@ -219,14 +225,14 @@ const ResumeDetailPage: React.FC = () => {
                                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                                 <circle cx="12" cy="10" r="3"/>
                               </svg>
-                              <span>{result.jobPosition?.workPlace || '위치 정보 없음'}</span>
+                              <span>{result.jobPosition.workPlace || '위치 정보 없음'}</span>
                             </div>
                             <div className="detail-item">
                               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
                                 <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
                               </svg>
-                              <span>{result.jobPosition?.employmentType || '고용 형태 정보 없음'}</span>
+                              <span>{result.jobPosition.employmentType || '고용 형태 정보 없음'}</span>
                             </div>
                           </div>
 
@@ -246,12 +252,12 @@ const ResumeDetailPage: React.FC = () => {
                           {/* 버튼 */}
                           <button
                             onClick={() => {
-                              if (result.jobPosition?.id) {
+                              if (result.jobPosition.id) {
                                 navigate(`/job-positions/${result.jobPosition.id}`);
                               }
                             }}
                             className="view-job-btn"
-                            disabled={!result.jobPosition?.id}
+                            disabled={!result.jobPosition.id}
                           >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
