@@ -209,12 +209,23 @@
 .stat-number {
   font-size: 32px;
   font-weight: 700;
-  color: white;
+  color: white !important;
+}
+
+.stat-numberB {
+  font-size: 32px;
+  font-weight: 700;
+  color: black;
 }
 
 .stat-label {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.stat-labelB {
+  font-size: 14px;
+  color: rgba(98, 97, 97, 0.8);
 }
 
 .stat-divider {

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { jobPositionAPI } from '../api/services';
 import { JobPositionSummary } from '../types';
 import Navigation from '../components/Navigation';
 import '../styles/JobPositions.css';
 
 const JobPositionsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [jobPositions, setJobPositions] = useState<JobPositionSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -128,14 +130,31 @@ const JobPositionsPage: React.FC = () => {
                       </div>
 
                       <div className="job-card-footer">
-                        <a 
-                          href={position.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
+                        {/* ✅ 수정: 우리 서비스 내에서 상세보기 */}
+                        <button
+                          onClick={() => navigate(`/job-positions/${position.id}`)}
                           className="btn-view-detail"
                         >
                           상세보기
-                        </a>
+                        </button>
+                        
+                        {/* 선택: 원본 공고 링크도 제공 */}
+                        {position.url && (
+                          <a 
+                            href={position.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="btn-external-small"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                              <polyline points="15 3 21 3 21 9"/>
+                              <line x1="10" y1="14" x2="21" y2="3"/>
+                            </svg>
+                            원본
+                          </a>
+                        )}
                       </div>
                     </div>
                   ))}

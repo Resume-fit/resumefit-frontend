@@ -8,9 +8,11 @@ import ResumeUploadPage from './pages/ResumeUploadPage';
 import ResumeDetailPage from './pages/ResumeDetailPage';
 import ResumeCreatePage from './pages/ResumeCreatePage';
 import JobPositionsPage from './pages/JobPositionsPage';
+import JobPositionDetailPage from './pages/JobPositionDetailPage';
 import MyPage from './pages/MyPage';
 import './App.css';
 import './styles/Common.css';
+import MatchingResultPage from './pages/MatchingResultPage';
 
 // 토큰 유효성 검사 함수
 const isValidToken = (token: string | null): boolean => {
@@ -179,6 +181,10 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          <Route path="/matching/:resumeId" element={<MatchingResultPage />} />
+          <Route path="/resumes/:resumeId" element={<ResumeDetailPage />} />
+          <Route path="/job-positions/:id" element={<JobPositionDetailPage />} />
 
           {/* 404 페이지 */}
           <Route path="*" element={<Navigate to="/" replace />} />

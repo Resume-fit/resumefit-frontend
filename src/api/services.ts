@@ -2,7 +2,6 @@ import axiosInstance from './axios';
 import {
   LoginRequest,
   LoginResponse,
-  JoinRequest,
   User,
   ResumeSummary,
   ResumeDetail,
@@ -93,6 +92,11 @@ export const matchingAPI = {
     const response = await axiosInstance.get(`/api/matching/${resumeId}`);
     return response.data;
   },
+
+  getMatchingResults: async (resumeId: number): Promise<MatchingResponse[]> => {
+    const response = await axiosInstance.get(`/api/matching/${resumeId}`);
+    return response.data;
+  },
 };
 
 // Review API
@@ -119,3 +123,6 @@ export const jobPositionAPI = {
     return response.data;
   },
 };
+
+// Re-export types for convenience
+export type { MatchingResponse } from '../types';

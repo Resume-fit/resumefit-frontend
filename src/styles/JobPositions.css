@@ -158,27 +158,60 @@
   gap: 4px;
 }
 
+/* ⭐ 카드 푸터 - 버튼 레이아웃 수정 */
 .job-card-footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
   padding-top: 16px;
   border-top: 1px solid #e0e0e0;
 }
 
+/* ⭐ 상세보기 버튼 - button으로 변경 */
 .btn-view-detail {
-  display: inline-block;
-  width: 100%;
-  padding: 12px;
+  flex: 1;
+  padding: 12px 16px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  text-decoration: none;
+  border: none;
   border-radius: 8px;
   text-align: center;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-view-detail:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* ⭐ 원본 공고 작은 버튼 추가 */
+.btn-external-small {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 12px;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-external-small:hover {
+  background: #f8f9ff;
+  transform: translateY(-2px);
+}
+
+.btn-external-small svg {
+  flex-shrink: 0;
 }
 
 /* 반응형 */
@@ -203,5 +236,19 @@
 
   .search-filter-section {
     padding: 16px;
+  }
+
+  /* 반응형에서 버튼 세로 배치 */
+  .job-card-footer {
+    flex-direction: column;
+  }
+
+  .btn-view-detail {
+    width: 100%;
+  }
+
+  .btn-external-small {
+    width: 100%;
+    justify-content: center;
   }
 }

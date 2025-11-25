@@ -50,6 +50,7 @@ const Navigation: React.FC = () => {
           >
             이력서 업로드
           </button>
+          {/* ⭐ 매칭 결과 메뉴 제거 - 각 이력서 카드에서 접근 */}
           <button 
             onClick={() => navigate('/job-positions')} 
             className={`nav-link ${isActive('/job-positions') ? 'active' : ''}`}
