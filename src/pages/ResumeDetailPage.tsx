@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { resumeAPI, matchingAPI } from '../api/services';
+import { resumeAPI, matchingAPI, reviewAPI } from '../api/services';
 import type { ResumeDetail, MatchingResponse } from '../types';
 import Navigation from '../components/Navigation';
 import '../styles/ResumeDetailPage.css';
@@ -17,6 +17,13 @@ const ResumeDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [matchingLoading, setMatchingLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // ⭐ 리뷰 관련 상태 추가
+  const [showReview, setShowReview] = useState(false);
+  const [reviewExists, setReviewExists] = useState(false);
+  const [checkingReview, setCheckingReview] = useState(false);
+  const [showOtherInput, setShowOtherInput] = useState(false);
+  const [otherComment, setOtherComment] = useState('');
 
   useEffect(() => {
     fetchResumeDetail();
@@ -46,21 +53,77 @@ const ResumeDetailPage: React.FC = () => {
   };
 
   const fetchMatchingResults = async () => {
-  try {
-    setMatchingLoading(true);
-    const data = await matchingAPI.getMatchingResults(Number(resumeId));
-    console.log('🔍 매칭 결과 원본 데이터:', JSON.stringify(data, null, 2));
-    console.log('🔍 첫 번째 결과:', data[0]);
-    if (data[0]) {
-      console.log('🔍 jobPosition:', data[0].jobPosition);
-      console.log('🔍 companyName:', data[0].jobPosition?.companyName);
+    try {
+      setMatchingLoading(true);
+      const data = await matchingAPI.getMatchingResults(Number(resumeId));
+      console.log('🔍 매칭 결과 원본 데이터:', JSON.stringify(data, null, 2));
+      console.log('🔍 첫 번째 결과:', data[0]);
+      if (data[0]) {
+        console.log('🔍 jobPosition:', data[0].jobPosition);
+        console.log('🔍 companyName:', data[0].jobPosition?.companyName);
+      }
+      setMatchingResults(data);
+    } catch (err: any) {
+      console.error('매칭 결과 조회 실패:', err);
+    } finally {
+      setMatchingLoading(false);
     }
-    setMatchingResults(data);
-  } catch (err: any) {
-    console.error('매칭 결과 조회 실패:', err);
-  } finally {
-    setMatchingLoading(false);
-  }
+  };
+
+  // ⭐ 리뷰 존재 여부 확인
+  const checkReviewStatus = async () => {
+    setCheckingReview(true);
+    try {
+      const exists = await reviewAPI.checkReviewExists(Number(resumeId));
+      setReviewExists(exists);
+    } catch (error) {
+      console.error('리뷰 상태 확인 실패:', error);
+      setReviewExists(false);
+    } finally {
+      setCheckingReview(false);
+    }
+  };
+
+  // ⭐ 리뷰 남기기 버튼 클릭
+  const handleReviewButtonClick = async () => {
+    await checkReviewStatus();
+    setShowReview(true);
+  };
+
+  // ⭐ 리뷰 제출
+  const handleReviewSubmit = async (reviewType: 'LIKE' | 'RESUME_MISMATCH' | 'FIELD_MISMATCH' | 'CRITERIA_UNCLEAR' | 'OTHER') => {
+    if (reviewType === 'OTHER' && !showOtherInput) {
+      setShowOtherInput(true);
+      return;
+    }
+
+    if (reviewType === 'OTHER' && !otherComment.trim()) {
+      alert('의견을 입력해주세요.');
+      return;
+    }
+
+    try {
+      const reviewData: any = { reviewType };
+      if (reviewType === 'OTHER') {
+        reviewData.otherComment = otherComment.trim();
+      }
+      
+      await reviewAPI.submitReview(Number(resumeId), reviewData);
+      alert('리뷰가 제출되었습니다. 감사합니다!');
+      setReviewExists(true);
+      setShowReview(false);
+      setShowOtherInput(false);
+      setOtherComment('');
+    } catch (err) {
+      console.error('리뷰 제출 실패:', err);
+      alert('리뷰 제출에 실패했습니다.');
+    }
+  };
+
+  // ⭐ 기타 입력에서 뒤로가기
+  const handleBackFromOther = () => {
+    setShowOtherInput(false);
+    setOtherComment('');
   };
 
   if (loading) {
@@ -269,6 +332,267 @@ const ResumeDetailPage: React.FC = () => {
                         </div>
                       ))}
                     </div>
+                  </div>
+
+                  {/* ⭐ 리뷰 남기기 섹션 추가 */}
+                  <div className="review-container" style={{ marginTop: '40px', textAlign: 'center' }}>
+                    {!showReview ? (
+                      <button 
+                        onClick={handleReviewButtonClick}
+                        className="btn-primary"
+                        disabled={checkingReview}
+                        style={{
+                          padding: '14px 28px',
+                          fontSize: '16px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          backgroundColor: '#4a90e2',
+                          color: 'white',
+                          border: 'none',
+                          fontWeight: '600',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        {checkingReview ? '확인 중...' : '이 매칭 결과에 대해 리뷰 남기기'}
+                      </button>
+                    ) : (
+                      <div className="review-section" style={{
+                        marginTop: '20px',
+                        padding: '30px',
+                        backgroundColor: '#f9f9f9',
+                        borderRadius: '12px',
+                        maxWidth: '800px',
+                        margin: '20px auto'
+                      }}>
+                        {reviewExists ? (
+                          <div className="review-already-submitted">
+                            <p style={{ color: '#666', fontSize: '16px', marginBottom: '20px', lineHeight: '1.6' }}>
+                              ✅ 이미 이 이력서에 대한 리뷰를 작성하셨습니다.<br/>
+                              소중한 의견 감사합니다!
+                            </p>
+                            <button 
+                              onClick={() => setShowReview(false)} 
+                              className="btn-primary"
+                              style={{
+                                padding: '10px 20px',
+                                borderRadius: '6px',
+                                backgroundColor: '#4a90e2',
+                                color: 'white',
+                                border: 'none',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              닫기
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <h3 style={{ marginBottom: '10px', fontSize: '20px', fontWeight: '600' }}>
+                              매칭 결과가 어떠셨나요?
+                            </h3>
+                            <p style={{ color: '#666', marginBottom: '25px' }}>
+                              귀하의 피드백은 AI 개선에 큰 도움이 됩니다.
+                            </p>
+                            
+                            {!showOtherInput ? (
+                              <>
+                                <div className="review-options" style={{
+                                  display: 'grid',
+                                  gridTemplateColumns: 'repeat(2, 1fr)',
+                                  gap: '12px',
+                                  marginBottom: '20px'
+                                }}>
+                                  <button 
+                                    onClick={() => handleReviewSubmit('LIKE')}
+                                    className="review-button"
+                                    style={{
+                                      padding: '16px',
+                                      borderRadius: '8px',
+                                      border: '2px solid #e0e0e0',
+                                      backgroundColor: 'white',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s',
+                                      fontSize: '15px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '10px'
+                                    }}
+                                  >
+                                    <span style={{ fontSize: '24px' }}>👍</span>
+                                    <span>결과가 마음에 들어요</span>
+                                  </button>
+                                  
+                                  <button 
+                                    onClick={() => handleReviewSubmit('RESUME_MISMATCH')}
+                                    className="review-button"
+                                    style={{
+                                      padding: '16px',
+                                      borderRadius: '8px',
+                                      border: '2px solid #e0e0e0',
+                                      backgroundColor: 'white',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s',
+                                      fontSize: '15px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '10px'
+                                    }}
+                                  >
+                                    <span style={{ fontSize: '24px' }}>📄</span>
+                                    <span>제 이력서와 잘 맞지 않아요</span>
+                                  </button>
+                                  
+                                  <button 
+                                    onClick={() => handleReviewSubmit('FIELD_MISMATCH')}
+                                    className="review-button"
+                                    style={{
+                                      padding: '16px',
+                                      borderRadius: '8px',
+                                      border: '2px solid #e0e0e0',
+                                      backgroundColor: 'white',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s',
+                                      fontSize: '15px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '10px'
+                                    }}
+                                  >
+                                    <span style={{ fontSize: '24px' }}>🎯</span>
+                                    <span>제 분야/직무와 맞지 않아요</span>
+                                  </button>
+                                  
+                                  <button 
+                                    onClick={() => handleReviewSubmit('CRITERIA_UNCLEAR')}
+                                    className="review-button"
+                                    style={{
+                                      padding: '16px',
+                                      borderRadius: '8px',
+                                      border: '2px solid #e0e0e0',
+                                      backgroundColor: 'white',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s',
+                                      fontSize: '15px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '10px'
+                                    }}
+                                  >
+                                    <span style={{ fontSize: '24px' }}>❓</span>
+                                    <span>추천 기준이 이해되지 않아요</span>
+                                  </button>
+                                  
+                                  <button 
+                                    onClick={() => handleReviewSubmit('OTHER')}
+                                    className="review-button"
+                                    style={{
+                                      padding: '16px',
+                                      borderRadius: '8px',
+                                      border: '2px solid #e0e0e0',
+                                      backgroundColor: 'white',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s',
+                                      fontSize: '15px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '10px',
+                                      gridColumn: 'span 2'
+                                    }}
+                                  >
+                                    <span style={{ fontSize: '24px' }}>✏️</span>
+                                    <span>기타 (직접 입력)</span>
+                                  </button>
+                                </div>
+
+                                <button 
+                                  onClick={() => setShowReview(false)} 
+                                  className="btn-secondary" 
+                                  style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    borderRadius: '6px',
+                                    backgroundColor: '#f0f0f0',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '15px'
+                                  }}
+                                >
+                                  취소
+                                </button>
+                              </>
+                            ) : (
+                              <div className="other-input-section">
+                                <textarea
+                                  value={otherComment}
+                                  onChange={(e) => setOtherComment(e.target.value)}
+                                  placeholder="어떤 점이 불편하셨나요? 의견을 자유롭게 작성해주세요."
+                                  className="other-textarea"
+                                  rows={5}
+                                  autoFocus
+                                  style={{
+                                    width: '100%',
+                                    padding: '14px',
+                                    borderRadius: '8px',
+                                    border: '2px solid #e0e0e0',
+                                    fontSize: '15px',
+                                    resize: 'vertical',
+                                    fontFamily: 'inherit'
+                                  }}
+                                />
+                                <div className="other-actions" style={{
+                                  display: 'flex',
+                                  gap: '12px',
+                                  marginTop: '15px'
+                                }}>
+                                  <button 
+                                    onClick={handleBackFromOther}
+                                    className="btn-secondary"
+                                    style={{
+                                      flex: 1,
+                                      padding: '12px',
+                                      borderRadius: '6px',
+                                      backgroundColor: '#f0f0f0',
+                                      border: 'none',
+                                      cursor: 'pointer',
+                                      fontSize: '15px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: '6px'
+                                    }}
+                                  >
+                                    ← 뒤로가기
+                                  </button>
+                                  <button 
+                                    onClick={() => handleReviewSubmit('OTHER')}
+                                    className="btn-primary"
+                                    disabled={!otherComment.trim()}
+                                    style={{
+                                      flex: 1,
+                                      padding: '12px',
+                                      borderRadius: '6px',
+                                      backgroundColor: otherComment.trim() ? '#4a90e2' : '#ccc',
+                                      color: 'white',
+                                      border: 'none',
+                                      cursor: otherComment.trim() ? 'pointer' : 'not-allowed',
+                                      fontSize: '15px'
+                                    }}
+                                  >
+                                    제출
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </>
               )}

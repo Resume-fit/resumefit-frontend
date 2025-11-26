@@ -126,6 +126,7 @@ export interface MatchingResponse {
 
 // 리뷰 관련 타입
 export interface ReviewRequest {
-  reviewType: 'LIKE' | 'RESUME_MISMATCH' | 'FIELD_MISMATCH' | 'COMPANY_MISMATCH';
+  reviewType: 'LIKE' | 'RESUME_MISMATCH' | 'FIELD_MISMATCH' | 'CRITERIA_UNCLEAR' | 'OTHER';
   recommendedJobPositionIds?: number[];
+  otherComment?: string;
 }

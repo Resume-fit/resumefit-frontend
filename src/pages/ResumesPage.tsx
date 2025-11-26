@@ -45,18 +45,43 @@ const ResumesPage: React.FC = () => {
   };
 
   const handleDeleteResume = async (resumeId: number) => {
-    if (!window.confirm('이력서를 삭제하시겠습니까?')) {
-      return;
-    }
+  if (!window.confirm('이력서를 삭제하시겠습니까?')) {
+    return;
+  }
 
-    try {
-      await resumeAPI.deleteResume(resumeId);
-      setResumes(resumes.filter(r => r.id !== resumeId));
-      alert('이력서가 삭제되었습니다.');
-    } catch (err) {
-      alert('이력서 삭제에 실패했습니다.');
+  try {
+    await resumeAPI.deleteResume(resumeId);
+    
+    // 성공 시 목록에서 제거
+    setResumes(resumes.filter(r => r.id !== resumeId));
+    alert('이력서가 삭제되었습니다.');
+    
+  } catch (err: any) {
+    console.error('이력서 삭제 실패:', err);
+    
+    let errorMessage = '이력서 삭제에 실패했습니다.';
+    
+    if (err.response) {
+      const status = err.response.status;
+      
+      if (status === 403) {
+        errorMessage = '이 이력서를 삭제할 권한이 없습니다.';
+      } else if (status === 404) {
+        errorMessage = '이미 삭제되었거나 존재하지 않는 이력서입니다.';
+        // 404면 프론트에서도 목록에서 제거
+        setResumes(resumes.filter(r => r.id !== resumeId));
+      } else if (status === 500) {
+        errorMessage = '서버 오류로 이력서 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.';
+      } else if (err.response.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+    } else if (err.request) {
+      errorMessage = '서버와 연결할 수 없습니다. 네트워크를 확인해주세요.';
     }
-  };
+    
+    alert(errorMessage);
+  }
+};
 
   const handleMatchResume = (resumeId: number) => {
     setSelectedResumeId(resumeId);
@@ -155,17 +180,6 @@ const ResumesPage: React.FC = () => {
                     </button>
                     
                     <button
-                      onClick={() => handleViewMatching(resume.id)}
-                      className="matching-button"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22 4 12 14.01 9 11.01"/>
-                      </svg>
-                      매칭 결과
-                    </button>
-                    
-                    <button
                       onClick={() => handleMatchResume(resume.id)}
                       className="match-button"
                     >
@@ -175,6 +189,17 @@ const ResumesPage: React.FC = () => {
                         <line x1="8" y1="12" x2="16" y2="12"/>
                       </svg>
                       AI 매칭하기
+                    </button>
+
+                    <button
+                      onClick={() => handleViewMatching(resume.id)}
+                      className="matching-button"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                      </svg>
+                      매칭 결과
                     </button>
                     
                     <button

@@ -4,6 +4,7 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:808
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 300000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -24,11 +25,18 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// 응답 인터셉터: 토큰 만료 시 재발급
+// 응답 인터셉터: 토큰 만료 시 재발급 및 타임아웃 처리
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    // ⭐ 타임아웃 에러 처리
+    if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+      console.error('요청 타임아웃:', error);
+      error.message = 'AI 분석 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.';
+      return Promise.reject(error);
+    }
 
     // 401 에러이고 재시도하지 않은 경우
     if (error.response?.status === 401 && !originalRequest._retry) {

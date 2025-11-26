@@ -99,10 +99,32 @@ export const matchingAPI = {
   },
 };
 
-// Review API
+// Review API (수정됨 - 하나로 통합)
 export const reviewAPI = {
+  // 리뷰 제출
   submitReview: async (resumeId: number, data: ReviewRequest): Promise<void> => {
-    await axiosInstance.delete(`/api/resumes/${resumeId}/review`, { data });
+    // ❌ 기존: DELETE 메서드 (오류)
+    // await axiosInstance.delete(`/api/resumes/${resumeId}/review`, { data });
+    
+    // ✅ 수정: POST 메서드 + 올바른 엔드포인트
+    await axiosInstance.post(`/api/reviews/${resumeId}`, data);
+  },
+
+  // 리뷰 존재 여부 확인
+  checkReviewExists: async (resumeId: number): Promise<boolean> => {
+    try {
+      const response = await axiosInstance.get(`/api/reviews/check/${resumeId}`);
+      return response.data; // true or false
+    } catch (error) {
+      console.error('리뷰 존재 확인 실패:', error);
+      return false;
+    }
+  },
+  
+  // 기존 리뷰 조회 (선택사항)
+  getReview: async (resumeId: number) => {
+    const response = await axiosInstance.get(`/api/reviews/${resumeId}`);
+    return response.data;
   },
 };
 
