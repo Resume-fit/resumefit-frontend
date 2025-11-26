@@ -57,12 +57,41 @@ const MatchingModal: React.FC<MatchingModalProps> = ({ resumeId, onClose }) => {
       
       console.log('✅ 매칭 완료 - 결과:', results.length, '개');
       console.log('📊 매칭 데이터:', results);
+      
+      // ✅ 매칭 성공 시
       setProgress(100);
       setMatchResults(results);
+      setMatching(false); // 로딩 상태 종료
       setCanClose(true);
+      
     } catch (err: any) {
       console.error('❌ 매칭 실패:', err);
       
+      // ✅ 타임아웃 에러 감지 강화
+      const isTimeout = err.code === 'ECONNABORTED' || 
+                       err.message?.toLowerCase().includes('timeout') ||
+                       err.message?.includes('초과');
+      
+      if (isTimeout) {
+        console.log('⏱️ 타임아웃 발생 - 백그라운드에서 매칭 계속 진행 중');
+        
+        setProgress(100);
+        setMatching(false); // 로딩 상태 종료
+        setCanClose(true);
+        
+        // 타임아웃 안내 메시지
+        alert(
+          '⏱️ AI 분석에 시간이 걸리고 있습니다.\n\n' +
+          '💡 매칭은 백그라운드에서 계속 진행되고 있습니다.\n' +
+          '잠시 후 "매칭 결과" 탭에서 확인해주세요.\n\n' +
+          '이 창을 닫습니다.'
+        );
+        
+        onClose(); // 모달 자동으로 닫기
+        return;
+      }
+      
+      // 기타 에러 처리
       let errorMessage = '매칭에 실패했습니다.';
       
       if (err.response?.status === 403) {
@@ -76,9 +105,8 @@ const MatchingModal: React.FC<MatchingModalProps> = ({ resumeId, onClose }) => {
       }
       
       setError(errorMessage);
-      setCanClose(true);
-    } finally {
       setMatching(false);
+      setCanClose(true);
     }
   };
 
@@ -123,10 +151,10 @@ const MatchingModal: React.FC<MatchingModalProps> = ({ resumeId, onClose }) => {
       
       await reviewAPI.submitReview(resumeId, reviewData);
       alert('리뷰가 제출되었습니다. 감사합니다!');
-      setReviewExists(true); // 리뷰 제출 후 상태 업데이트
-      setShowReview(false); // 리뷰 섹션 닫기
-      setShowOtherInput(false); // 기타 입력 화면 초기화
-      setOtherComment(''); // 코멘트 초기화
+      setReviewExists(true);
+      setShowReview(false);
+      setShowOtherInput(false);
+      setOtherComment('');
     } catch (err) {
       console.error('리뷰 제출 실패:', err);
       alert('리뷰 제출에 실패했습니다.');
@@ -188,12 +216,7 @@ const MatchingModal: React.FC<MatchingModalProps> = ({ resumeId, onClose }) => {
               </div>
               <p className="progress-text">{progress}%</p>
               <p className="matching-warning">
-                매칭에는 약 1분 정도 소요됩니다.<br/>
-                {canClose ? (
-                  <span style={{ color: '#666' }}>언제든지 닫기 버튼을 눌러 취소할 수 있습니다.</span>
-                ) : (
-                  <span style={{ color: '#e74c3c' }}>잠시만 기다려주세요...</span>
-                )}
+                ⏱️ 매칭에는 약 1-2분 정도 소요됩니다.
               </p>
             </div>
           )}
@@ -212,7 +235,7 @@ const MatchingModal: React.FC<MatchingModalProps> = ({ resumeId, onClose }) => {
               {!showReview ? (
                 <>
                   <div className="result-section">
-                    <h3>적합 (현재 지원 가능)</h3>
+                    <h3>✅ 적합 (현재 지원 가능)</h3>
                     {suitableMatches.length > 0 ? (
                       <div className="match-list">
                         {suitableMatches.map((match, index) => (
@@ -244,7 +267,7 @@ const MatchingModal: React.FC<MatchingModalProps> = ({ resumeId, onClose }) => {
                   </div>
 
                   <div className="result-section">
-                    <h3>성장 트랙 (역량 보충 필요)</h3>
+                    <h3>🌱 성장 트랙 (역량 보충 필요)</h3>
                     {growthMatches.length > 0 ? (
                       <div className="match-list">
                         {growthMatches.map((match, index) => (
